@@ -1,0 +1,10 @@
+2026-03-06T15:32:45.612+09:00  WARN 13604 --- [demo] [main] com.example.demo.LogApplication          : application started
+2026-03-06T15:32:45.613+09:00 ERROR 13604 --- [demo] [main] com.example.demo.LogApplication          : application started
+2026-03-06T15:37:07.847+09:00  INFO 33944 --- [demo] [main] com.example.demo.DemoApplication         : Starting DemoApplication using Java 21.0.7 with PID 33944 (D:\gonikim\spring\spring-boot-study-gonikim\lombok\build\classes\java\main started by GD in D:\gonikim\spring\spring-boot-study-gonikim\lombok)
+2026-03-06T15:37:07.849+09:00  INFO 33944 --- [demo] [main] com.example.demo.DemoApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-03-06T15:37:08.281+09:00  INFO 33944 --- [demo] [main] com.example.demo.DemoApplication         : Started DemoApplication in 1.11 seconds (process running for 1.588)
+2026-03-06T15:37:08.284+09:00  INFO 33944 --- [demo] [main] com.example.demo.LogApplication          : loopCount10
+2026-03-06T15:37:08.285+09:00  INFO 33944 --- [demo] [main] com.example.demo.LogApplication          : testerNameSpring Tester
+2026-03-06T15:37:08.285+09:00  INFO 33944 --- [demo] [main] com.example.demo.LogApplication          : application started
+2026-03-06T15:37:08.285+09:00  WARN 33944 --- [demo] [main] com.example.demo.LogApplication          : application started
+2026-03-06T15:37:08.285+09:00 ERROR 33944 --- [demo] [main] com.example.demo.LogApplication          : application started
