@@ -20,7 +20,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Member {
     // 해당 컬럼이 PK(Primary Key)
     // Spring Data JDBC에서 엔티티의 식별자
-    @Id
+    @Id // 반드시 필요(없으면 PK 식별 불가, INSERT / UPDATE 판단 불가)
     private Long id;
     private String name;
 //    @Column("user_email") // 컬럼명이 다를 경우 명시적으로 지정
