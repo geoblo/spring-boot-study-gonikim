@@ -1,8 +1,16 @@
 package com.example.demo.repository;
 
+import com.example.demo.dto.MemberStats;
 import com.example.demo.entity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -78,18 +86,96 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // SELECT *
     // FROM member
     // WHERE name = ‘…’ AND email = ‘…’ OR age > …
+    List<Member> findByNameIsAndEmailIsOrAgeIsGreaterThan(String name, String email, Integer age);
+    List<Member> findByNameAndEmailOrAgeGreaterThan(String name, String email, Integer age);
 
+    // 4. 정렬 순서
+    // 이름순으로 조회
+    List<Member> findByOrderByNameAsc();
 
+    // 이름의 역순으로 조회
+    List<Member> findByOrderByNameDesc();
 
+    // 이름순으로 조회하고 이름이 같은 경우에는 나이의 역순으로 조회
+    List<Member> findByOrderByNameAscAgeDesc();
 
+    // 이름의 일부분으로 검색하고 그 결과는 이름순으로 조회
+    // 조건과 정렬 방법 등이 함께 이름에 사용되면 가독성이 떨어짐
+    List<Member> findByNameContainingOrderByNameAsc(String name);
 
+    // 나이순으로 정렬하고 나이가 가장 적은 한 명을 조회(LIMIT 1)
+    Member findTopByOrderByAgeAsc();
+    Member findFirstByOrderByAgeAsc();
 
+    // 나이순으로 정렬하고 나이가 가장 적은 두 명을 조회(LIMIT 2)
+    List<Member> findTop2ByOrderByAgeAsc();
+    List<Member> findFirst2ByOrderByAgeAsc();
 
+    // 정렬 조건을 분리하는 방식(권장)
+    // Sort 객체와 Pageable 객체를 매개변수로 검색하는 메소드
+    // 이름의 일부분으로 검색하고 Sort 객체의 정보를 기반으로 정렬
+    // Sort: 정렬만 필요할 때
+    List<Member> findByNameContaining(String name, Sort sort);
 
+    // 이름의 일부분으로 검색하고 Pageable 객체의 정보를 기반으로 페이지 조회
+    // Pageable: 페이징 + 정렬이 필요할 때
+    Page<Member> findByNameContaining(String name, Pageable pageable);
+    // Page: 조회 결과 + 페이징 정보까지 포함한 객체
 
+    // 5. 삭제
+    // 이메일을 사용해 회원 삭제
+    @Transactional
+    int deleteByEmail(String email);
 
+    // 이름을 사용해 회원 삭제
+    @Transactional
+    int deleteByName(String name);
 
+    // JPQL 방식
+    // JPQL은 객체 지향 쿼리이지 SQL이 아니다.
+    // JPQL 작성 시 테이블과 컬럼 이름 대신 엔티티에서 정의한 클래스 이름과 프로퍼티 이름을 사용
+    // 대소문자를 구분하고 엔티티 이름은 반드시 별칭 사용
 
+    // 파라미터에 따라 이름으로 검색하거나 이름과 이메일 둘 다 사용해 검색하는 JPQL 매핑
+    // @Query: 리포지터리 메소드와 JPQL을 매핑
+    // @Param: 파라미터를 JPQL로 전달하고, JPQL에서는 콜론(:)을 사용해 받음
+    @Query("SELECT m FROM Member m WHERE m.name = :name")
+    List<Member> findMember(@Param("name") String name);
+
+    @Query("SELECT m FROM Member m WHERE m.name = :name AND m.email = :email")
+    List<Member> findMember(@Param("name") String name, @Param("email") String email);
+
+    // JPQL로 JOIN 쿼리 작성하기
+    // 회원의 이름, 이메일 그리고 회원이 작성한 게시글의 개수를 조회
+    // 쿼리한 결과는 객체 배열 Object[]로 받아 사용하면 됨
+    @Query("""
+            SELECT m.name, m.email, COUNT(a.id) as count
+            FROM Member m
+            LEFT JOIN Article a ON a.member = m
+            GROUP BY m
+            ORDER BY count DESC
+    """)
+    List<Object[]> getMemberStatsObject();
+    // Object[0]: m.name
+    // Object[1]: m.email
+    // Object[2]: COUNT(a.id)
+
+    // 직접 생성한 회원 통계 객체로 반환
+    @Query("""
+            SELECT new com.example.demo.dto.MemberStats(m.name, m.email, COUNT(a.id) as count)
+            FROM Member m
+            LEFT JOIN Article a ON a.member = m
+            GROUP BY m
+            ORDER BY count DESC
+    """)
+    List<MemberStats> getMemberStats();
+
+    // 전체 회원에 대해 나이를 특정한 값으로 수정
+//    @Modifying // UPDATE/DELETE 데이터를 변경하는 쿼리임을 명시적으로 알려줌 -> executeUpdate()
+    @Modifying(clearAutomatically = true) // 벌크 작업 이후에 영속성 컨텍스트에 캐시되어 있는 엔티티들을 clear
+    @Query("UPDATE Member m SET m.age = :age") // @Query는 기본적으로 조회용 -> executeQuery()
+    @Transactional
+    int setMemberAge(Integer age);
 
 
 }
