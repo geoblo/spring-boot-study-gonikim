@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.dto.MemberStats;
+import com.example.demo.dto.MemberStatsNative;
 import com.example.demo.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -176,6 +177,38 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("UPDATE Member m SET m.age = :age") // @Query는 기본적으로 조회용 -> executeQuery()
     @Transactional
     int setMemberAge(Integer age);
+
+    // 네이티브 SQL 쿼리 작성하기
+    // JPQL 예제와 동일한 동작을 하는 메소드
+    // SQL이므로 엔티티 이름 대신 실제 테이블 이름과 컬럼 이름을 사용해야 함
+    // 매개변수를 사용할 때는 :name과 같이 사용하고, @Param으로 전달
+    @Query(value = """
+            SELECT m.name, m.email, COUNT(a.id) as count
+            FROM member m
+            LEFT JOIN article a ON m.id = a.member_id
+            GROUP BY m.id
+            ORDER BY count DESC
+    """, nativeQuery = true)
+    List<Object[]> getMemberStatsNativeObject();
+
+    // JPQL에서와 같이 객체 배열 대신 직접 회원 통계 객체를 반환하도록 할 수 있음
+    // 네이티브 SQL에서는 JPQL의 new 명령어를 사용할 수 없으므로, 반환 타입이 인터페이스인 경우에만 매핑이 가능
+    @Query(value = """
+            SELECT m.name, m.email, COUNT(a.id) as count
+            FROM member m
+            LEFT JOIN article a ON m.id = a.member_id
+            GROUP BY m.id
+            ORDER BY count DESC
+    """, nativeQuery = true)
+    List<MemberStatsNative> getMemberNativeStats();
+
+
+
+
+
+
+
+
 
 
 }
