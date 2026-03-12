@@ -7,6 +7,7 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,15 @@ public class MemberService {
 
         return mapToMemberResponse(member);
     }
+
+    // 여러 명의 회원 정보를 생성하는 메소드
+    @Transactional
+    public List<MemberResponse> createMembers(List<MemberRequest> memberRequests) {
+        return memberRequests.stream()
+                .map(memberRequest -> create(memberRequest))
+                .toList();
+    }
+
 
     // 회원 목록 전체 조회
     public List<MemberResponse> findAll() {
