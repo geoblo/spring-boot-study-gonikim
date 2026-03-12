@@ -26,6 +26,36 @@ public class MemberController {
         return memberService.findAll();
     }
 
+    @GetMapping("/{id}")
+    public MemberResponse get(@PathVariable("id") Long id) {
+        return memberService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public MemberResponse put(@PathVariable("id") Long id, @RequestBody MemberRequest memberRequest) {
+        return memberService.update(id, memberRequest);
+    }
+
+    @PatchMapping("/{id}")
+    public MemberResponse patch(@PathVariable("id") Long id, @RequestBody MemberRequest memberRequest) {
+        return memberService.patch(id, memberRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") Long id) {
+        memberService.deleteById(id);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
