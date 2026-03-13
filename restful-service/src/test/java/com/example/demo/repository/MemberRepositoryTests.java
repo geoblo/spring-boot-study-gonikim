@@ -1,15 +1,14 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.Member;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@DisplayName("회원 리포지터리 테스트")
 public class MemberRepositoryTests {
     @Autowired
     private MemberRepository memberRepository;
@@ -32,6 +31,7 @@ public class MemberRepositoryTests {
     }
 
     @Test
+    @DisplayName("조건 검색 테스트")
     public void testUserCase1() {
         // 첫 번째 테스트 코드
         // 회원 리포지터리에 저장된 개수(회원 수)가 4인지 검증
@@ -65,7 +65,9 @@ public class MemberRepositoryTests {
         assertThat(memberRepository.findByAgeLessThanEqual(26).size()).isEqualTo(3);
     }
 
-    @Test
+//    @Test
+    @RepeatedTest(value = 3, name = "테스트 {displayName} 중 {currentRepetition} of {totalRepetitions}")
+    @DisplayName("정렬 순서 테스트")
     public void testUserCase2() {
         // 두 번째 테스트 코드
         // 사용자 이름 순으로 조회를 한 결과 개수가 4인지 검증
@@ -76,6 +78,8 @@ public class MemberRepositoryTests {
     }
 
     @Test
+    @DisplayName("JPQL 테스트")
+    @Disabled("잠시 테스트 중단")
     public void testUserCase3() {
         // 세 번째 테스트 코드
         // 이름이 '윤서준'인 사람의 수가 1인지 검증
