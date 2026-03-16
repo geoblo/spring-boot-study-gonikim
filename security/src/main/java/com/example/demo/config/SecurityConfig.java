@@ -14,26 +14,61 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import javax.sql.DataSource;
+
+import static org.springframework.security.config.Customizer.*;
 
 // 스프링 시큐리티 관련 설정을 위한 빈을 정의할 수 있는 클래스
 @Configuration
 public class SecurityConfig {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            RememberMeServices rememberMeServices) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/home").permitAll() // 모든 사용자에게 허용
                         .requestMatchers("/member/**").hasAuthority("ROLE_ADMIN") // 로그인한 사용자 중에 해당 권한이 있는 사용자만 접근 허용
                         .anyRequest().authenticated() // 그 외의 모든 요청은 인증된 사용자만 접근 허용
                 )
-                .formLogin(Customizer.withDefaults())
-                .logout(Customizer.withDefaults());
+                .rememberMe(remember -> remember
+                        .rememberMeServices(rememberMeServices))
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/home")
+                        .permitAll());
 
         return http.build();
     }
 
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(DataSource dataSource) {
+        // 스프링 시큐리티에서 기본적으로 제공하는 토큰 저장을 위한 클래스
+        JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
+        repository.setDataSource(dataSource); // 토큰을 저장/조회할 DB 연결 설정
+
+        return repository;
+    }
+
+    @Bean
+    public RememberMeServices rememberMeServices(
+            UserDetailsService userDetailsService,
+            PersistentTokenRepository tokenRepository) {
+        return new PersistentTokenBasedRememberMeServices(
+                "myRememberMeKey", // 토근 생성 시 사용되는 고유한 비밀 키
+                userDetailsService, // 사용자 정보를 조회하기 위해
+                tokenRepository // 토큰을 저장하기 위해
+        );
+    }
 
     // 임시1: 메모리 기반 사용자 인증
 //    @Bean
@@ -60,8 +95,6 @@ public class SecurityConfig {
     public UserDetailsService userDetailsServiceJdbc(DataSource dataSource) {
         return new JdbcUserDetailsManager(dataSource);
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

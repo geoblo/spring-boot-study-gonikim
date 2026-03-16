@@ -8,19 +8,19 @@
 </head>
 <body>
 <ul>
-    <li sec:authorize="">
+    <li sec:authorize="isAnonymous()">
         <a th:href="@{/login}">로그인</a>
     </li>
-    <li>
+    <li sec:authorize="isAuthenticated()">
         <a th:href="@{/logout}">로그아웃</a>
     </li>
-    <li>
+    <li sec:authorize="isAuthenticated()">
         <a th:href="@{/home}" sec:authentication="principal.username">아이디</a>
     </li>
-    <li>
-        <a th:href="@{/home}">홍길동</a>
+    <li sec:authorize="isAuthenticated()">
+        <a th:href="@{/home}" sec:authentication="principal.displayName">홍길동</a>
     </li>
-    <li>
+    <li sec:authorize="hasAnyRole('ADMIN')">
         <a th:href="@{/member/list}">회원 목록</a>
     </li>
 </ul>
