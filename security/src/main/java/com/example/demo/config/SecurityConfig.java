@@ -39,7 +39,7 @@ public class SecurityConfig {
     }
 
     // 임시2: JDBC(데이터베이스) 기반 사용자 인증
-    @Bean
+//    @Bean
     public UserDetailsService userDetailsServiceJdbc(DataSource dataSource) {
         return new JdbcUserDetailsManager(dataSource);
     }
