@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,14 +66,14 @@ public class ArticleService {
     }
 
     // 게시글 수정
-    public ArticleDto update(Long memberId, ArticleForm articleForm) throws BadRequestException {
+    public ArticleDto update(Long memberId, ArticleForm articleForm) {
         // 기존에 작성된 게시글이 없다면 잘못된 요청이므로 예외를 발생시키고,
         // 존재하는 게시글이라면 제목과 본문의 내용을 게시글 DTO 객체에 들어있는 내용으로 교체해 리포지터리에 저장
         Article article = articleRepository.findById(articleForm.getId()).orElseThrow();
 
         // (보안 체크) 수정하려는 게시글이 로그인한 사용자에 의해 작성되었는지 확인
         if (!article.getMember().getId().equals(memberId)) {
-            throw new BadRequestException();
+            throw new AccessDeniedException("권한 없음");
         }
 
         article.setTitle(articleForm.getTitle());
@@ -82,7 +83,23 @@ public class ArticleService {
         return mapToMemberDto(article);
     }
 
+    // (보안 추가)
+    public boolean isOwner(Long articleId, Long memberId) {
+        if (articleId == null || memberId == null) {
+            return false;
+        }
 
+        return articleRepository.findById(articleId)
+                .map(article -> memberId.equals(article.getMember().getId()))
+                .orElse(false);
+    }
+
+    // 게시글 삭제
+    public void delete(Long id) {
+        Article article = articleRepository.findById(id).orElseThrow();
+
+        articleRepository.delete(article);
+    }
 
 
 

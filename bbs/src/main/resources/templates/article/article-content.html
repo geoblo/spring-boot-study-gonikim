@@ -37,9 +37,13 @@
         <!-- 게시글을 작성한 회원의 아이디와 로그인한 회원의 아이디가 같다면 수정, 삭제 버튼을 보여줌 -->
         <!-- 방법1: 현재 사용자가 로그인한 사용자인지를 확인
             로그인한 사용자라면 #authentication.principal로 참조 가능 -->
-        <th:block sec:authorize="isAuthenticated()" th:if="${#authentication.principal.memberId == article.memberId}">
-            <a type="button" class="btn btn-warning btn-sm" th:href="@{/article/edit(id=${article.id})}">수정</a>
-            <a type="button" class="btn btn-danger btn-sm" th:href="@{/article/delete(id=${article.id})}">삭제</a>
+        <th:block sec:authorize="isAuthenticated()">
+            <th:block th:if="${#authentication.principal.memberId == article.memberId}">
+                <a type="button" class="btn btn-warning btn-sm" th:href="@{/article/edit(id=${article.id})}">수정</a>
+                <a type="button" class="btn btn-danger btn-sm" th:href="@{/article/delete(id=${article.id})}">삭제</a>
+                <!-- 참고: 삭제 = 상태 변경
+                   GET 요청이 아닌 form 태그를 이용한 POST 요청을 보내는 것이 권장됨 -->
+            </th:block>
         </th:block>
     </section>
 </body>

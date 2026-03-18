@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -117,6 +118,8 @@ public class ArticleController {
 
     // 게시글 수정 화면
     @GetMapping("/edit")
+    // @articleService: @는 스프링 빈을 참조할 때 사용하는 식별자
+    @PreAuthorize("@articleService.isOwner(#articleForm.id, principal.memberId)")
     public String getArticleEdit(@ModelAttribute("article") ArticleForm articleForm) {
         ArticleDto articleDto = articleService.findById(articleForm.getId());
         articleForm.setId(articleDto.getId());
@@ -132,7 +135,6 @@ public class ArticleController {
             @Valid @ModelAttribute("article") ArticleForm articleForm,
             BindingResult bindingResult,
             @AuthenticationPrincipal MemberUserDetails userDetails) {
-
         if (bindingResult.hasErrors()) {
             return "article/article-edit";
         }
@@ -142,7 +144,13 @@ public class ArticleController {
         return "redirect:/article/content?id=" + articleForm.getId();
     }
 
+    // 게시글 삭제 처리
+    @GetMapping("/delete")
+    public String getArticleDelete(@RequestParam("id") Long id) {
+        articleService.delete(id);
 
+        return "redirect:/article/list";
+    }
 
 
 
